@@ -1,0 +1,20 @@
+# Masters and decks. Too large for GitHub (100 MB per file) and only needed
+# locally, where tools/build_site.py turns them into the files in site/.
+Projects/
+*.pptx
+
+# The first browser draft of the deck. Superseded by the PowerPoint, and it
+# carries the studio's email and phone in plain text, which must not be public.
+/index.html
+/deck.css
+/deck.js
+/build_pptx.py
+
+# Local tooling
+.claude/
+__pycache__/
+*.pyc
+.vercel/
+.DS_Store
+Thumbs.db
+desktop.ini

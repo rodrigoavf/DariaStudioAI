@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact | DARIA · AI Creative Studio</title>
+<meta name="description" content="Start a project with DARIA. Send one product photo and where it needs to run, and we come back with creative directions for your campaign.">
+<meta name="theme-color" content="#1F4640">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DARIA · AI Creative Studio">
+<meta property="og:title" content="Contact | DARIA · AI Creative Studio">
+<meta property="og:description" content="Send one product photo and where it needs to run. We come back with creative directions.">
+<meta property="og:image" content="/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap site-head__in">
+    <a class="brand" href="index.html" aria-label="DARIA, AI Creative Studio, home">
+      <span class="brand__mark">DARIA</span>
+      <span class="brand__sub">AI Creative Studio</span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="portfolio.html">Portfolio</a>
+      <a href="contact.html" aria-current="page">Contact</a>
+      <a class="btn btn--sm" href="downloads/DARIA-AI-Creative-Studio-Portfolio.pdf" download>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m0 0L5 7m3 3 3-3M3 13h10"/></svg>Portfolio PDF
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="band--pine contact-hero">
+  <div class="wrap contact-hero__in">
+    <span class="eyebrow">Contact</span>
+    <h1>Tell us what you’re making.</h1>
+    <p class="lede">A product photo and a line about where it will run is enough. You’ll hear back from the person who would make the work.</p>
+    <!-- The address is never written into the page. The script puts it
+         together when one of these buttons is pressed. -->
+    <div class="actions contact-hero__actions">
+      <button class="btn" type="button" data-mail="A project for DARIA">Email us</button>
+      <button class="btn btn--ghost" type="button" data-mail-copy>Copy email address</button>
+      <a class="btn btn--ghost" href="https://www.instagram.com/" data-instagram target="_blank" rel="noopener">Instagram</a>
+    </div>
+    <noscript><p class="lede">Please turn on JavaScript to email us or send a brief from this page.</p></noscript>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <header class="intro">
+      <span class="eyebrow">Brief</span>
+      <h2>Or send a short brief.</h2>
+    </header>
+
+    <div class="form-card">
+      <!-- To receive briefs without the visitor's email app, set
+           data-endpoint to a form service URL (see README). -->
+      <form class="form" id="brief" data-endpoint="" action="#" method="post">
+        <div class="form-row">
+          <div class="field">
+            <label for="f-name">Your name</label>
+            <input id="f-name" name="name" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="f-company">Brand or company <span class="opt">· optional</span></label>
+            <input id="f-company" name="company" type="text" autocomplete="organization">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <input id="f-email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <fieldset class="field">
+          <legend>What you have in mind</legend>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="interest" value="Single image"><span>Single image</span></label>
+            <label class="choice"><input type="radio" name="interest" value="Visual set"><span>Visual set</span></label>
+            <label class="choice"><input type="radio" name="interest" value="Custom campaign"><span>Custom campaign</span></label>
+            <label class="choice"><input type="radio" name="interest" value="Not sure yet" checked><span>Not sure yet</span></label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="f-message">The product, and where the work will run</label>
+          <textarea id="f-message" name="message" required placeholder="For example: a 250 ml shampoo bottle, for Instagram Reels in Spain."></textarea>
+        </div>
+        <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <div class="form-foot">
+          <button class="btn" type="submit">Send brief</button>
+          <p class="form-note">This opens your email app with the brief written out. You can attach product photos there.</p>
+        </div>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="section band--sand">
+  <div class="wrap">
+    <header class="intro">
+      <span class="eyebrow">What happens next</span>
+      <h2>From first message to first image.</h2>
+    </header>
+    <ol class="next" data-reveal>
+      <li><span class="num">01</span><p>We read your brief and reply by email.</p></li>
+      <li><span class="num">02</span><p>We send creative directions for your product, for you to choose from.</p></li>
+      <li><span class="num">03</span><p>We produce the one you pick as a finished still.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap pdf-band">
+    <span class="eyebrow">For your team</span>
+    <h2>Take the portfolio with you.</h2>
+    <p class="lede">The full deck as a PDF, ready to forward to whoever signs off.</p>
+    <div class="actions" style="justify-content:center">
+      <a class="btn" href="downloads/DARIA-AI-Creative-Studio-Portfolio.pdf" download>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8m0 0L5 7m3 3 3-3M3 13h10"/></svg>Download PDF
+      </a>
+      <a class="btn btn--ghost" href="portfolio.html">View it online</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="site-foot__top">
+      <a class="brand" href="index.html" aria-label="DARIA, AI Creative Studio, home">
+        <span class="brand__mark">DARIA</span>
+        <span class="brand__sub">AI Creative Studio</span>
+      </a>
+      <nav class="foot-nav" aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="contact.html">Contact</a>
+        <a href="downloads/DARIA-AI-Creative-Studio-Portfolio.pdf" download>Portfolio PDF</a>
+        <a href="https://www.instagram.com/" data-instagram target="_blank" rel="noopener">Instagram</a>
+      </nav>
+    </div>
+    <div class="foot-rail">
+      <span>DARIA · AI Creative Studio · Braga, Portugal</span>
+      <span>All imagery on this site is AI generated</span>
+      <span>© 2026</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js" defer></script>
+</body>
+</html>
