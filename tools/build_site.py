@@ -6,6 +6,7 @@
     python tools/build_site.py video      # web films
     python tools/build_site.py frames     # stills taken from the films
     python tools/build_site.py og         # the social share image
+    python tools/build_site.py icons      # favicon, app icons and web manifest
 
 The source of truth is `DARIA AI Presentation 2026.pptx`. The `deck` step
 opens it in PowerPoint (read-only), exports every slide and the PDF, and
@@ -366,7 +367,60 @@ def build_og():
         print("og     site/assets/og.jpg")
 
 
-STEPS = {"deck": build_deck, "images": build_images, "video": build_video, "og": build_og}
+# ----------------------------------------------------------------- icons ---
+
+# The mark: a cream Playfair "D" on pine, over the short gold rule the deck
+# uses under its wordmark. Gold only ever sits on pine, so the pairing holds.
+ICON_HTML = """<!DOCTYPE html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=block" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 512px; height: 512px; overflow: hidden; background: transparent; }
+  .tile { position: relative; width: 512px; height: 512px; background: #1F4640; border-radius: %(radius)s; }
+  .d { position: absolute; left: 0; right: 0; top: 50px; text-align: center;
+       font: 700 360px/1 "Playfair Display", Georgia, serif; color: #FAF6F0; }
+  .rule { position: absolute; left: 50%%; top: 404px; width: 132px; height: 16px; margin-left: -66px; background: #C99A3E; }
+</style></head><body><div class="tile"><div class="d">D</div><div class="rule"></div></div></body></html>"""
+
+
+def render_icon(radius):
+    with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as profile:
+        tmp = Path(tmp)
+        (tmp / "icon.html").write_text(ICON_HTML % {"radius": radius}, encoding="utf-8")
+        shot = tmp / "icon.png"
+        subprocess.run([browser(), "--headless=new", "--disable-gpu", "--hide-scrollbars",
+                        f"--user-data-dir={profile}", "--virtual-time-budget=20000",
+                        "--default-background-color=00000000",
+                        "--window-size=512,512", f"--screenshot={shot}", (tmp / "icon.html").as_uri()],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return Image.open(shot).convert("RGBA")
+
+
+def build_icons():
+    out = SITE / "assets" / "icons"
+    clear(out)
+    tile = render_icon("22%")     # browser tabs, bookmarks, Android
+    square = render_icon("0")     # iOS rounds the corners itself
+    for size in (32, 192, 512):
+        tile.resize((size, size), Image.LANCZOS).save(out / f"icon-{size}.png", optimize=True)
+    square.convert("RGB").resize((180, 180), Image.LANCZOS).save(out / "apple-touch-icon.png", optimize=True)
+    tile.save(SITE / "favicon.ico", sizes=[(16, 16), (32, 32), (48, 48)])
+    (SITE / "site.webmanifest").write_text(
+        '{\n'
+        '  "name": "DARIA \u00b7 AI Creative Studio",\n'
+        '  "short_name": "DARIA",\n'
+        '  "icons": [\n'
+        '    { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },\n'
+        '    { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }\n'
+        '  ],\n'
+        '  "theme_color": "#1F4640",\n'
+        '  "background_color": "#FAF6F0",\n'
+        '  "display": "standalone"\n'
+        '}\n', encoding="utf-8")
+    print("icons  favicon.ico, assets/icons/, site.webmanifest")
+
+
+STEPS = {"deck": build_deck, "images": build_images, "video": build_video, "og": build_og,
+         "icons": build_icons}
 EXTRA = {"frames": build_frames, "refs": build_refs}  # parts of the steps above, on their own
 
 if __name__ == "__main__":

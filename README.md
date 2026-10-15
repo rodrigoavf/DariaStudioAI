@@ -191,6 +191,8 @@ Vercel deploys it from there.
 
 After that, each push to `main` publishes the site again.
 
+`python tools/build_site.py icons` redraws the favicon and app icons.
+
 `vercel.json` also gives clean URLs (`/portfolio`, `/contact`), long caching
 for media, and makes the PDF download instead of opening in a tab.
 
