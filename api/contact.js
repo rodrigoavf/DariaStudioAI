@@ -75,11 +75,18 @@ module.exports = async function handler(req, res) {
       text,
       html,
     }),
-  }).catch((e) => ({ ok: false, status: 0, text: async () => String(e) }));
+  }).catch((e) => ({ ok: false, status: 0, text: async () => JSON.stringify({ name: 'network_error', message: String(e) }) }));
 
   if (!sent.ok) {
-    console.error('contact: Resend refused the email', sent.status, await sent.text());
-    return res.status(502).json({ ok: false, error: 'send-failed' });
+    const raw = await sent.text();
+    console.error('contact: Resend refused the email', sent.status, raw);
+    // Pass back Resend's error code (e.g. "validation_error") so a failed send
+    // can be diagnosed from the browser, but never its message, which can
+    // quote email addresses.
+    let reason = 'unknown';
+    try { reason = JSON.parse(raw).name || reason; } catch (e) { /* not JSON */ }
+    if (!/^[a-z_]{1,40}$/.test(reason)) reason = 'unknown';
+    return res.status(502).json({ ok: false, error: 'send-failed', reason, status: sent.status });
   }
   return res.status(200).json({ ok: true });
 };
