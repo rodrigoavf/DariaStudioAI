@@ -542,6 +542,29 @@ html:not(.js) [data-present] { display: none; }
 }
 .slide > img { display: block; width: 100%; height: 100%; }
 
+/* Sizes inside a slide follow the slide's own width */
+.slide { container-type: inline-size; }
+
+/* Where the deck printed the studio's address, the page offers a button */
+.slide-cta {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: .9cqw;
+  padding: 0 2.2cqw;
+  background: var(--paper);
+  color: var(--pine);
+  border-radius: 2px;
+  font: 500 max(8px, 1.05cqw)/1 var(--sans);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color .2s ease;
+}
+.slide-cta:hover { background: #fff; }
+.slide-cta:focus-visible { outline-color: var(--gold); }
+
 /* A film sits exactly where it sits on the slide */
 .slide-film { position: absolute; display: grid; place-items: center; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; }
 .slide-film .play { width: clamp(30px, 4.8vw, 62px); height: clamp(30px, 4.8vw, 62px); }

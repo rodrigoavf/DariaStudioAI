@@ -28,7 +28,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 PPTX = ROOT / "DARIA AI Presentation 2026.pptx"
@@ -56,6 +56,13 @@ FILMS = {
 
 # The home page opens on this film, so it also gets a lighter cut for phones.
 HERO_FILM = "showreel"
+
+# The showreel's end card prints the phone number and email. From the frame
+# the card cuts in (31.7 s), that line is filled in from the cream around it;
+# "Braga, Portugal" beside it stays.
+FILM_MASKS = {
+    "showreel": "delogo=x=388:y=950:w=590:h=36:enable='gte(t,31.7)'",
+}
 
 # One still per film, taken at this many seconds in. The home page uses them
 # as the frame a film shows before it plays, and two of them in the stills row.
@@ -203,8 +210,10 @@ def build_video():
     # Masters run at ~25 Mbps. CRF 24 capped at 4 Mbps is visually clean at
     # 1080p and brings 390 MB down to a size a page can carry.
     for slug, (_, master) in FILMS.items():
-        encode(master, VID / f"{slug}.mp4", "-crf", "24", "-maxrate", "4M", "-bufsize", "8M", "-b:a", "128k")
-    encode(FILMS[HERO_FILM][1], VID / f"{HERO_FILM}-720.mp4", "-vf", "scale=-2:720",
+        mask = ["-vf", FILM_MASKS[slug]] if slug in FILM_MASKS else []
+        encode(master, VID / f"{slug}.mp4", *mask, "-crf", "24", "-maxrate", "4M", "-bufsize", "8M", "-b:a", "128k")
+    small = ",".join(filter(None, [FILM_MASKS.get(HERO_FILM), "scale=-2:720"]))
+    encode(FILMS[HERO_FILM][1], VID / f"{HERO_FILM}-720.mp4", "-vf", small,
            "-crf", "26", "-maxrate", "1800k", "-bufsize", "3600k", "-b:a", "96k")
     build_frames()
 
@@ -232,7 +241,8 @@ FOOTER_NOISE = re.compile(r"^(\d\d / \d\d|DARIA — AI CREATIVE STUDIO|FINAL —
 
 
 def read_deck():
-    """Per slide: its text (for alt text) and where each film sits."""
+    """Per slide: its text (for alt text), where each film sits, and the
+    boxes holding an email or phone number, which the site paints out."""
     by_size = {(SRC / master).stat().st_size: slug for slug, (_, master) in FILMS.items()}
     with zipfile.ZipFile(PPTX) as z:
         part_size = {"/" + i.filename: i.file_size for i in z.infolist()}
@@ -241,8 +251,10 @@ def read_deck():
     w, h = pres.slide_width, pres.slide_height
     slides = []
     for slide in pres.slides:
-        texts, films = [], []
+        texts, films, hide = [], [], []
         for shape in slide.shapes:
+            if shape.has_text_frame and PRIVATE.search(shape.text_frame.text):
+                hide.append((shape.left / w, shape.top / h, shape.width / w, shape.height / h))
             link = shape.element.xpath(".//a:videoFile/@r:link")
             if link:
                 part = shape.part.rels[link[0]].target_part
@@ -255,11 +267,33 @@ def read_deck():
                     if (line and not FOOTER_NOISE.match(line) and not PRIVATE.search(line)
                             and "PLACEHOLDER" not in line and ".mp4" not in line):
                         texts.append(line)
-        slides.append((texts, films))
+        # the hairline drawn under a hidden address goes with it
+        for shape in slide.shapes:
+            sx, sy, sw, sh = shape.left / w, shape.top / h, shape.width / w, shape.height / h
+            if shape.has_text_frame and shape.text_frame.text.strip() or sh > 0.005:
+                continue
+            for x, y, bw, bh in list(hide):
+                if 0 <= sy - (y + bh) < 0.03 and sx < x + bw and sx + sw > x:
+                    hide.append((sx, sy, sw, sh))
+                    break
+        slides.append((texts, films, hide))
     return slides
 
 
-def slide_markup(n, total, texts, films):
+def paint_out(im, boxes):
+    """Cover each box with the colour just above it: slide backgrounds are flat."""
+    draw = ImageDraw.Draw(im)
+    W, H = im.size
+    for x, y, bw, bh in boxes:
+        x0, y0 = max(0, int(x * W) - 6), max(0, int(y * H) - 4)
+        x1, y1 = min(W - 1, int((x + bw) * W) + 6), min(H - 1, int((y + bh) * H) + 4)
+        above = max(0, y0 - 8)
+        samples = [im.getpixel((xx, above)) for xx in range(x0, x1, max(1, (x1 - x0) // 16))]
+        draw.rectangle([x0, y0, x1, y1], fill=max(set(samples), key=samples.count))
+    return im
+
+
+def slide_markup(n, total, texts, films, hide=()):
     alt = f"Slide {n} of {total}. " + " · ".join(texts)
     if len(alt) > 420:
         alt = alt[:417].rsplit(" ", 1)[0] + "…"
@@ -273,6 +307,11 @@ def slide_markup(n, total, texts, films):
         out.append(f'  <button class="slide-film{small}" type="button" data-film="assets/video/{slug}.mp4" '
                    f'style="left:{x:.4%};top:{y:.4%};width:{fw:.4%};height:{fh:.4%}" '
                    f'aria-label="Play the {FILMS[slug][0]} film">{PLAY}</button>')
+    # where the deck printed the address large, the site offers the contact page
+    for x, y, bw, bh in hide:
+        if bh > 0.05:
+            out.append(f'  <a class="slide-cta" href="contact.html" style="left:{x:.4%};top:{y + bh * 0.12:.4%};'
+                       f'height:{bh * 0.76:.4%}">Start a project <span aria-hidden="true">&rarr;</span></a>')
     out.append("</section>")
     return "\n".join(out)
 
@@ -291,7 +330,7 @@ def build_deck():
 
         clear(DECK)
         for n, png in enumerate(pngs, 1):
-            im = Image.open(png).convert("RGB")
+            im = paint_out(Image.open(png).convert("RGB"), slides[n - 1][2])
             im.save(DECK / f"slide-{n:02d}-2x.webp", "WEBP", quality=84, method=6)
             im.resize((1280, 720), Image.LANCZOS).save(DECK / f"slide-{n:02d}.webp", "WEBP", quality=86, method=6)
         print("deck  ", total, "slides", f"{sum(f.stat().st_size for f in DECK.iterdir()) / 1e6:.1f} MB")
@@ -307,7 +346,7 @@ def build_deck():
         doc.close()  # Windows cannot clear the temp folder while the file is open
         print("pdf   ", total, "pages", f"{PDF.stat().st_size / 1e6:.1f} MB")
 
-    block = "\n\n".join(slide_markup(n, total, texts, films) for n, (texts, films) in enumerate(slides, 1))
+    block = "\n\n".join(slide_markup(n, total, *slide) for n, slide in enumerate(slides, 1))
     page = PORTFOLIO.read_text(encoding="utf-8")
     page, hits = re.subn(r"(<!-- slides:start[^>]*-->).*?(<!-- slides:end -->)",
                          lambda m: f"{m.group(1)}\n{block}\n{m.group(2)}", page, flags=re.S)
@@ -316,7 +355,8 @@ def build_deck():
     page = re.sub(r'(data-deck="count">)[^<]*', rf"\g<1>{total}", page)
     page = re.sub(r'(data-deck="size">)[^<]*', rf"\g<1>{size}", page)
     PORTFOLIO.write_text(page, encoding="utf-8")
-    print("page   portfolio.html updated ·", sum(len(f) for _, f in slides), "films placed")
+    print("page   portfolio.html updated ·", sum(len(s[1]) for s in slides), "films placed ·",
+          sum(len(s[2]) for s in slides), "contact details painted out")
 
 
 # -------------------------------------------------------------------- og ---

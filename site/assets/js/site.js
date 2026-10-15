@@ -296,49 +296,43 @@
   }
 
   /* ---- contact form ----
-     With data-endpoint set (Formspree, Web3Forms, …) the brief is posted
-     there. Without one it opens the visitor's email app with the brief
-     already written, so the form works with no backend at all. */
+     Posts the brief to /api/contact, which emails it to the studio
+     (see api/contact.js). Nothing leaves the page until the visitor
+     presses Send brief. */
   var form = $('#brief');
   if (form) {
     var status = $('.form-status', form);
-    var note = $('.form-note', form);
-    if (form.dataset.endpoint && note) note.textContent = 'We reply by email. You can send product photos once we are in touch.';
+    var send = $('button[type="submit"]', form);
+    var label = send.textContent;
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      if (form.website && form.website.value) return; // honeypot
       var data = new FormData(form);
-      var get = function (k) { return (data.get(k) || '').toString().trim(); };
-      var endpoint = form.dataset.endpoint;
+      var brief = {};
+      data.forEach(function (v, k) { brief[k] = String(v).trim(); });
 
-      if (endpoint) {
-        var send = $('button[type="submit"]', form);
-        send.disabled = true;
-        status.textContent = 'Sending…';
-        fetch(endpoint, { method: 'POST', body: data, headers: { Accept: 'application/json' } })
-          .then(function (r) { if (!r.ok) throw new Error(String(r.status)); })
-          .then(function () {
-            form.reset();
-            status.textContent = 'Thank you. Your brief is with us, and we will reply by email.';
-          })
-          .catch(function () {
-            status.textContent = 'That did not go through. Please use the Email us button at the top of the page.';
-          })
-          .then(function () { send.disabled = false; });
-        return;
-      }
-
-      var lines = [
-        'Name: ' + get('name'),
-        'Brand / company: ' + (get('company') || '(not given)'),
-        'Email: ' + get('email'),
-        'Looking for: ' + (get('interest') || '(not given)'),
-        '',
-        get('message')
-      ];
-      var who = get('company') || get('name');
-      mailTo('New brief' + (who ? ': ' + who : ''), lines.join('\n'));
-      status.textContent = 'Your email app should now show the brief, ready to send. If nothing opened, use Copy email address at the top of the page.';
+      send.disabled = true;
+      send.textContent = 'Sending…';
+      status.textContent = '';
+      fetch(form.dataset.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(brief)
+      })
+        .then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) {
+            if (!r.ok || !j.ok) throw new Error(j.error || String(r.status));
+          });
+        })
+        .then(function () {
+          form.reset();
+          status.textContent = 'Thank you. Your brief is with us, and we will reply by email.';
+        })
+        .catch(function (err) {
+          status.textContent = err.message === 'invalid'
+            ? 'Please add your name, a valid email and a few words about the product.'
+            : 'Your brief could not be sent just now. Please try again, or use Email us at the top of the page.';
+        })
+        .then(function () { send.disabled = false; send.textContent = label; });
     });
   }
 })();

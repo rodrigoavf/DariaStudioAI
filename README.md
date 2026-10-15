@@ -166,14 +166,23 @@ the deck, update the stills row and the "You send / We deliver" panels in
 ### Email and Instagram
 
 The email address is never written into the pages. `site/assets/js/site.js`
-puts it together only when a visitor presses **Email us**, **Copy email
-address** or **Send brief**, so a harvester reading the HTML finds nothing. To
-change the address, edit `address()` in that file.
+puts it together only when a visitor presses **Email us** or **Copy email
+address**, so a harvester reading the HTML finds nothing. To change the
+address, edit `address()` in that file.
 
-The address does still appear inside the deck: as pixels on the first and last
-slides of the portfolio page, at the end of the showreel, and as text in the
-PDF. Remove it from the PowerPoint and re-run the build if you want it gone
-from those as well.
+The build also keeps it off the portfolio page and out of the showreel:
+
+- `deck` finds any slide text that looks like an email or phone number, paints
+  it out of the exported slide images, and where the deck shows the address
+  large (the closing slide) puts a **Start a project** button linking to the
+  contact page instead.
+- `video` covers the phone and email line on the showreel's end card
+  (`FILM_MASKS` in `tools/build_site.py`). If the end card changes, adjust the
+  box and start time there.
+
+The PDF is the one place it remains, as text, because it is the deck exactly as
+exported. Remove it from the PowerPoint and re-run `deck` if you want it gone
+there too.
 
 Every Instagram link takes its address from `INSTAGRAM` at the top of
 `site/assets/js/site.js`. It points at instagram.com until a handle exists.
@@ -225,11 +234,34 @@ link previews show the image everywhere.
 
 ### The contact form
 
-With no setup, **Send brief** opens the visitor's email app with the brief
-already written (the address is filled in by the script, as above). That needs no backend, but it depends on the visitor having an
-email app configured. To receive briefs directly instead, create a form on a
-service such as Formspree or Web3Forms and paste its URL into `data-endpoint`
-on the `<form>` in `contact.html`. Nothing else needs to change.
+**Send brief** posts the form to `api/contact.js`, a Vercel serverless
+function that emails the brief to the studio through
+[Resend](https://resend.com). Pressing Reply on that email answers the person
+who wrote. A hidden field turns away most bots, and the function only accepts
+posts from the site itself.
+
+It needs a one-time setup, because the address and the key cannot live in this
+public repository:
+
+1. Sign up at [resend.com](https://resend.com) **with the email that should
+   receive briefs**. Until you verify a domain of your own, Resend can only
+   deliver to the address the account was opened with.
+2. In Resend, open **API Keys** and create a key with *Sending access*.
+3. In Vercel, open the project, then **Settings → Environment Variables**, and
+   add, for Production and Preview:
+   - `RESEND_API_KEY`: the key from step 2
+   - `CONTACT_TO`: the email that receives briefs
+4. Redeploy: **Deployments**, the latest one, **⋯ → Redeploy**.
+
+Send a test brief from the live contact page afterwards. If it fails, the
+reason shows under **Logs** in the Vercel project.
+
+Once the studio has its own domain, verify it in Resend and add
+`CONTACT_FROM` (for example `DARIA <studio@your-domain>`) so briefs come from
+your domain and can go to any inbox.
+
+The form cannot send from a local preview (`python -m http.server` has no
+functions), so it shows its error message there. That is expected.
 
 ---
 

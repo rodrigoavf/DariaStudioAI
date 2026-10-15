@@ -69,9 +69,8 @@
     </header>
 
     <div class="form-card">
-      <!-- To receive briefs without the visitor's email app, set
-           data-endpoint to a form service URL (see README). -->
-      <form class="form" id="brief" data-endpoint="" action="#" method="post">
+      <!-- Briefs go to api/contact.js, which emails them to the studio. -->
+      <form class="form" id="brief" data-endpoint="/api/contact" action="#" method="post">
         <div class="form-row">
           <div class="field">
             <label for="f-name">Your name</label>
@@ -102,7 +101,7 @@
         <div class="hp" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <div class="form-foot">
           <button class="btn" type="submit">Send brief</button>
-          <p class="form-note">This opens your email app with the brief written out. You can attach product photos there.</p>
+          <p class="form-note">Your brief comes straight to us, and we reply by email. Product photos can follow once we are in touch.</p>
         </div>
         <p class="form-status" role="status" aria-live="polite"></p>
       </form>
