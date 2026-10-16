@@ -2,9 +2,9 @@
    still read, the films play through native controls and the slides
    show in order. */
 (function () {
-  /* Set this once the studio has an Instagram account. Every Instagram
+  /* The studio's Instagram. Every Instagram
      link on the site takes its address from here. */
-  var INSTAGRAM = 'https://www.instagram.com/';
+  var INSTAGRAM = 'https://www.instagram.com/daria.studio.ai/';
 
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };

@@ -185,7 +185,7 @@ exported. Remove it from the PowerPoint and re-run `deck` if you want it gone
 there too.
 
 Every Instagram link takes its address from `INSTAGRAM` at the top of
-`site/assets/js/site.js`. It points at instagram.com until a handle exists.
+`site/assets/js/site.js` (https://www.instagram.com/daria.studio.ai/). The links in the HTML carry the same address, so they work without JavaScript; change both if the handle changes.
 
 ### Deploying to Vercel
 
