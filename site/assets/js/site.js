@@ -15,7 +15,7 @@
 
   /* ---- the studio's address ----
      Never written into the pages, so harvesters that read the HTML find
-     nothing. It is put together here, only when a person asks for it. */
+     nothing. It is put together here, only when a person presses Email us. */
   function address() {
     var flip = function (s) { return s.split('').reverse().join(''); };
     return flip('rdv.airad') + String.fromCharCode(64) + flip('moc.liamg');
@@ -29,18 +29,6 @@
   $$('[data-mail]').forEach(function (btn) {
     btn.addEventListener('click', function () { mailTo(btn.dataset.mail || ''); });
   });
-  $$('[data-mail-copy]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var label = btn.textContent;
-      var done = function (text) { btn.textContent = text; setTimeout(function () { btn.textContent = label; }, 2200); };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(address()).then(function () { done('Copied'); }, function () { done('Could not copy'); });
-      } else {
-        done('Could not copy');
-      }
-    });
-  });
-
   /* ---- mobile menu ---- */
   var toggle = $('.nav-toggle');
   var nav = $('#nav');

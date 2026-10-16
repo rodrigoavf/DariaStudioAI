@@ -166,8 +166,8 @@ the deck, update the stills row and the "You send / We deliver" panels in
 ### Email and Instagram
 
 The email address is never written into the pages. `site/assets/js/site.js`
-puts it together only when a visitor presses **Email us** or **Copy email
-address**, so a harvester reading the HTML finds nothing. To change the
+puts it together only when a visitor presses **Email us**, so a harvester
+reading the HTML finds nothing. To change the
 address, edit `address()` in that file.
 
 The build also keeps it off the portfolio page and out of the showreel:
